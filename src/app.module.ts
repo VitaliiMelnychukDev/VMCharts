@@ -15,7 +15,7 @@ import { ConfigModule } from '@nestjs/config';
     MongooseModule.forRoot(process.env.DB_URI)
   ],
   controllers: [],
-  providers: [],
+  providers: []
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {

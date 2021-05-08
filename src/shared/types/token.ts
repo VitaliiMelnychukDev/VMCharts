@@ -1,10 +1,6 @@
 import { Role } from './role';
 
-export interface IRefreshToken {
-  userId: string;
-}
-
-export interface IAccessToken {
+export interface IAccessTokenPayload {
   userId: string;
   roles?: Role[];
   email: string;

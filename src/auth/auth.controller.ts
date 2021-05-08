@@ -11,12 +11,17 @@ import { ILoginData, ILoginResponse } from './types/auth';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { ValidateTokenDto } from './dtos/validate-token.dto';
 import { StatusCodes } from 'http-status-codes';
+import { AuthNeeded } from '../shared/decorators/auth.decorator';
+import { Roles } from '../shared/decorators/roles.decorator';
+import { Role } from '../shared/types/role';
 
 @Controller(AuthPath.Base)
 export class AuthController {
   constructor(private userService: UserService, private authService: AuthService) {
   }
 
+  @AuthNeeded()
+  @Roles(Role.Admin)
   @Post(AuthPath.Register)
   public async register(@Body(new ValidationPipe()) user: CreateUserDto): Promise<IResponse> {
     await this.userService.create(user);

@@ -4,4 +4,4 @@ export enum Role {
   ChartEditor = 'chartEditor'
 }
 
-export const ROLES_KEY = 'roles';
+export const rolesDecoratorKey = 'roles';
