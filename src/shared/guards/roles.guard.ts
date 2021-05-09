@@ -11,11 +11,13 @@ export class RolesGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request: any = context.switchToHttp().getRequest();
     const roles: Role[] = this.reflector.get<Role[]>(rolesDecoratorKey, context.getHandler());
     if (!roles || !roles.length) {
       return true;
     }
+
+    roles.push(Role.Admin);
 
     const user: IAccessTokenPayload | undefined = request.user;
 

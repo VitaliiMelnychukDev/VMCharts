@@ -8,15 +8,15 @@ export class TokenService {
   constructor(private configService: ConfigService) {
   }
 
-  generateAccessToken(data: any): string {
+  public generateAccessToken(data: any): string {
     return this.generateToken(data, this.getAccessTokenExpiration());
   }
 
-  generateRefreshToken(data: any): string {
+  public generateRefreshToken(data: any): string {
     return this.generateToken(data, this.getRefreshTokenExpiration());
   }
 
-  verify(token: string): any {
+  public verify(token: string): any {
     try {
       return  jwt.verify(token, this.getSecret());
     } catch(e) {

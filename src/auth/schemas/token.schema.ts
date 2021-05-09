@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { User } from './user.schema';
-import { SchemaUserName } from '../types/schema/user.schema';
+import { SchemaUserName } from '../types/schema/user';
 
 export type TokenDocument = Token & Document;
 

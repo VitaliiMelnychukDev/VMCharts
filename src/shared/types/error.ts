@@ -1,7 +1,7 @@
 export enum GeneralError {
-  ValidationFailed = 'validationFailed'
+  ValidationFailed = 'ValidationFailed'
 }
 
 export enum TokenError {
-  TokenIsNotValid = 'tokenIsNotValid'
+  TokenIsNotValid = 'TokenIsNotValid'
 }

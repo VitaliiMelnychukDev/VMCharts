@@ -5,6 +5,8 @@ export type SongDocument = Song & Document;
 
 @Schema()
 export class Song {
+  _id: string;
+
   @Prop({required: true})
   name: string;
 

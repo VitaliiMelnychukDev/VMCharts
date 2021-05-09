@@ -20,6 +20,4 @@ import { AuthGuard } from './guards/auth.guard';
   ],
   exports: [TokenService]
 })
-export class SharedModule {
-
-}
+export class SharedModule {}

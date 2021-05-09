@@ -29,7 +29,7 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const jwtToken = TokenHelper.parseToken(authorizationToken);
+      const jwtToken: string = TokenHelper.parseToken(authorizationToken);
       const parsedToken: IAccessTokenPayload = this.tokenService.verify(jwtToken);
       request.user = parsedToken;
 

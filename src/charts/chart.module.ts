@@ -4,13 +4,20 @@ import { ChartService } from './services/chart.service';
 import { SongController } from './controllers/song.controller';
 import { SongService } from './services/song.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Song, SongSchema } from './schemas/song.schema';
+import { SongSchema } from './schemas/song.schema';
+import { SongSchemaName } from './types/schema/song';
+import { ChartSchemaName } from './types/schema/chart';
+import { ChartSchema } from './schemas/chart.schema';
 
 @Module({
   imports: [MongooseModule.forFeature([
     {
-      name: Song.name,
+      name: SongSchemaName,
       schema: SongSchema
+    },
+    {
+      name: ChartSchemaName,
+      schema: ChartSchema
     }
   ])],
   providers: [ChartService, SongService],

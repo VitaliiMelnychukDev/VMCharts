@@ -53,8 +53,8 @@ export class AuthController {
 
   @HttpCode(StatusCodes.OK)
   @Post(AuthPath.Validate)
-  public async validate(@Body(new ValidationPipe()) payload: ValidateTokenDto): Promise<IResponse> {
-    await this.authService.validateToken(payload.accessToken);
+  public validate(@Body(new ValidationPipe()) payload: ValidateTokenDto): IResponse {
+     this.authService.validateToken(payload.accessToken);
 
     return {
       message: AuthMessage.TokenValidationSuccess

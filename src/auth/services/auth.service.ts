@@ -1,22 +1,20 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginUserDto } from '../dtos/login-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { SchemaUserName } from '../types/schema/user.schema';
 import { Model } from "mongoose";
-import { User, UserDocument } from '../schemas/user.schema';
+import { User } from '../schemas/user.schema';
 import { HashService } from './hash.service';
 import { AuthError } from '../types/error';
 import { UserRepository } from '../repositories/user.repository';
 import { TokenService } from '../../shared/services/token.service';
 import { ILoginData, IAccessToken, IRefreshTokenPayload } from '../types/auth';
 import { Token, TokenDocument } from '../schemas/token.schema';
-import { TokenSchemaName } from '../types/schema/token.schema';
+import { TokenSchemaName } from '../types/schema/token';
 import { TokenRepository } from '../repositories/token.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(SchemaUserName) private userModel: Model<UserDocument>,
     @InjectModel(TokenSchemaName) private tokenModel: Model<TokenDocument>,
     private hashService: HashService,
     private userRepository: UserRepository,
@@ -26,19 +24,19 @@ export class AuthService {
 
   public async login(loginData: LoginUserDto): Promise<ILoginData> {
     try {
-      const user: User | undefined = await this.userRepository.findByEmail(loginData.email);
+      const user: User | null = await this.userRepository.findByEmail(loginData.email);
 
       if (!user) {
         throw new UnauthorizedException(AuthError.LoginUserFail);
       }
 
-      const passwordIsValid = await this.hashService.isMatch(loginData.password, user.password);
+      const passwordIsValid: boolean = await this.hashService.isMatch(loginData.password, user.password);
 
       if (!passwordIsValid) {
         throw new UnauthorizedException(AuthError.LoginUserFail);
       }
 
-      return this.generateAndSaveTokens(user);
+      return await this.generateAndSaveTokens(user);
     } catch (e) {
       throw new UnauthorizedException(AuthError.LoginUserFail);
     }
@@ -47,7 +45,7 @@ export class AuthService {
   public async refreshToken(refreshToken: string): Promise<ILoginData> {
     try {
       this.tokenService.verify(refreshToken);
-      const token: Token = await this.tokenRepository.findByRefreshTokenAndRemove(refreshToken);
+      const token: Token | null = await this.tokenRepository.findByRefreshTokenAndRemove(refreshToken);
 
       if (!token) {
         throw new BadRequestException(AuthError.RefreshTokenFail);
@@ -59,14 +57,14 @@ export class AuthService {
     }
   }
 
-  async validateToken(accessToken: string): Promise<IAccessToken> {
+  public validateToken(accessToken: string): IAccessToken {
     return this.tokenService.verify(accessToken);
   }
 
   public async logout(refreshToken: string): Promise<void> {
     try {
       const tokenPayload: IRefreshTokenPayload = this.tokenService.verify(refreshToken);
-      const token: Token = await this.tokenRepository.findByRefreshToken(refreshToken);
+      const token: Token | null = await this.tokenRepository.findByRefreshToken(refreshToken);
 
       if (!token) {
         throw new BadRequestException(AuthError.LogoutFail);
@@ -98,7 +96,7 @@ export class AuthService {
   }
 
   private async saveRefreshToken(userId: string, refreshToken: string): Promise<Token> {
-    const token = new this.tokenModel({
+    const token: TokenDocument = new this.tokenModel({
       user: userId,
       refreshToken
     });
