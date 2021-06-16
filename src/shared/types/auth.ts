@@ -1,1 +1,1 @@
-export const authDecoratorKay = 'authDecoratorKay';
+export const authDecoratorKey = 'authDecoratorKey';

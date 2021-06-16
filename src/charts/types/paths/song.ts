@@ -1,3 +1,4 @@
 export enum SongPath {
-  Base = 'song'
+  Base = 'song',
+  Search = 'search'
 }

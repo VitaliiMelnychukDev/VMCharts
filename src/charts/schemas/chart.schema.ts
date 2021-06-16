@@ -1,8 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { RockGenre } from '../types/chart';
+import { SongSchemaName } from '../types/schema/song';
 
 export type ChartDocument = Chart & Document;
+
+@Schema()
+export class SongsItem {
+  position: number;
+  song: string;
+}
 
 @Schema()
 export class Chart {
@@ -12,22 +19,28 @@ export class Chart {
   name: string;
 
   @Prop()
+  description?: string;
+
+  @Prop()
+  slug: string;
+
+  @Prop()
   genre?: RockGenre;
 
   @Prop({
     type: [{
       position: {
-        type: Number
+        type: Number,
+        required: true
       },
       song: {
-        type: MongooseSchema.Types.ObjectId
+        type: MongooseSchema.Types.ObjectId,
+        ref: SongSchemaName,
+        required: true
       }
     }]
   })
-  songs?: [{
-    position: number;
-    song: string;
-  }]
+  songs?: SongsItem[]
 }
 
 export const ChartSchema = SchemaFactory.createForClass(Chart);

@@ -1,8 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { Role, rolesDecoratorKey } from '../types/role';
 import { Reflector } from '@nestjs/core';
-import { authDecoratorKay } from '../types/auth';
+import { authDecoratorKey } from '../types/auth';
 import { TokenService } from '../services/token.service';
 import { TokenHelper } from '../helpers/token.helper';
 import { IAccessTokenPayload } from '../types/token';
@@ -16,26 +15,34 @@ export class AuthGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: any = context.switchToHttp().getRequest();
 
-    const authNeeded: boolean | undefined = this.reflector.get<boolean | undefined>(authDecoratorKay, context.getHandler());
+    const authNeeded: boolean | undefined = this.reflector.get<boolean | undefined>(authDecoratorKey, context.getHandler());
 
     if (!authNeeded) {
       return true;
     }
 
+    if (!request.headers) {
+      this.userIsNotAuthorized();
+    }
+
     const authorizationToken = request.headers.authorization;
 
     if (!authorizationToken) {
-      return false
+      this.userIsNotAuthorized();
     }
 
     try {
       const jwtToken: string = TokenHelper.parseToken(authorizationToken);
-      const parsedToken: IAccessTokenPayload = this.tokenService.verify(jwtToken);
+      const parsedToken: IAccessTokenPayload = this.tokenService.getAccessTokenPayload(jwtToken);
       request.user = parsedToken;
 
       return true;
     } catch {
-      return false;
+      this.userIsNotAuthorized();
     }
+  }
+
+  private userIsNotAuthorized(): void {
+    throw new UnauthorizedException();
   }
 }

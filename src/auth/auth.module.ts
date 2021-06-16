@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
-import { AuthController } from './auth.controller';
+import { AuthController } from './controllers/auth.controller';
 import { CommandModule } from 'nestjs-command';
 import { UserCommand } from './command/user.command';
 import { UserService } from './services/user.service';
@@ -13,6 +13,7 @@ import { SharedModule } from '../shared/shared.module';
 import { TokenSchemaName } from './types/schema/token';
 import { TokenSchema } from './schemas/token.schema';
 import { TokenRepository } from './repositories/token.repository';
+import { AccountController } from './controllers/account.controller';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { TokenRepository } from './repositories/token.repository';
       }
     ])
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, AccountController],
   providers: [AuthService, UserService, HashService, UserCommand, UserRepository, TokenRepository]
 })
 export class AuthModule {}

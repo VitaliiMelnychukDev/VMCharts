@@ -7,10 +7,11 @@ import { HashService } from './hash.service';
 import { AuthError } from '../types/error';
 import { UserRepository } from '../repositories/user.repository';
 import { TokenService } from '../../shared/services/token.service';
-import { ILoginData, IAccessToken, IRefreshTokenPayload } from '../types/auth';
+import { ILoginData, ITokenData, IUserData } from '../types/auth';
 import { Token, TokenDocument } from '../schemas/token.schema';
 import { TokenSchemaName } from '../types/schema/token';
 import { TokenRepository } from '../repositories/token.repository';
+import { IRefreshTokenPayload, IAccessTokenBody } from '../../shared/types/token';
 
 @Injectable()
 export class AuthService {
@@ -23,68 +24,91 @@ export class AuthService {
   ) {}
 
   public async login(loginData: LoginUserDto): Promise<ILoginData> {
+    let user: User | null = null;
+
     try {
-      const user: User | null = await this.userRepository.findByEmail(loginData.email);
-
-      if (!user) {
-        throw new UnauthorizedException(AuthError.LoginUserFail);
-      }
-
-      const passwordIsValid: boolean = await this.hashService.isMatch(loginData.password, user.password);
-
-      if (!passwordIsValid) {
-        throw new UnauthorizedException(AuthError.LoginUserFail);
-      }
-
-      return await this.generateAndSaveTokens(user);
+      user = await this.userRepository.findByEmail(loginData.email);
     } catch (e) {
       throw new UnauthorizedException(AuthError.LoginUserFail);
     }
+
+    if (!user) {
+      throw new UnauthorizedException(AuthError.LoginUserFail);
+    }
+
+    const passwordIsValid: boolean = await this.hashService.isMatch(loginData.password, user.password);
+
+    if (!passwordIsValid) {
+      throw new UnauthorizedException(AuthError.LoginUserFail);
+    }
+
+    const tokenData: ITokenData = await this.generateAndSaveTokens(user);
+
+    delete user.password;
+
+    return {
+      ...tokenData,
+      user: this.mapLoginUser(user)
+    };
   }
 
-  public async refreshToken(refreshToken: string): Promise<ILoginData> {
+  public async refreshToken(refreshToken: string): Promise<ITokenData> {
+    this.tokenService.verifyAndGeTokenData(refreshToken);
+    let token: Token | null = null;
+
     try {
-      this.tokenService.verify(refreshToken);
-      const token: Token | null = await this.tokenRepository.findByRefreshTokenAndRemove(refreshToken);
-
-      if (!token) {
-        throw new BadRequestException(AuthError.RefreshTokenFail);
-      }
-
-      return await this.generateAndSaveTokens(token.user);
+      token = await this.tokenRepository.findByRefreshTokenAndRemove(refreshToken);
     } catch {
       throw new BadRequestException(AuthError.RefreshTokenFail);
     }
+
+    if (!token) {
+      throw new BadRequestException(AuthError.RefreshTokenFail);
+    }
+
+    return await this.generateAndSaveTokens(token.user);
   }
 
-  public validateToken(accessToken: string): IAccessToken {
-    return this.tokenService.verify(accessToken);
+  public validateToken(accessToken: string): IAccessTokenBody {
+    return this.tokenService.verifyAndGeTokenData(accessToken);
   }
 
   public async logout(refreshToken: string): Promise<void> {
+    let tokenPayload: IRefreshTokenPayload = this.tokenService.verifyAndGeTokenData(refreshToken);
+    let token: Token | null = await this.tokenRepository.findByRefreshToken(refreshToken);
+
+
     try {
-      const tokenPayload: IRefreshTokenPayload = this.tokenService.verify(refreshToken);
-      const token: Token | null = await this.tokenRepository.findByRefreshToken(refreshToken);
-
-      if (!token) {
-        throw new BadRequestException(AuthError.LogoutFail);
-      }
-
-      await this.tokenRepository.removeByUserId(tokenPayload.id);
+      token = await this.tokenRepository.findByRefreshToken(refreshToken);
     } catch {
       throw new BadRequestException(AuthError.LogoutFail);
     }
+
+    if (!token) {
+      throw new BadRequestException(AuthError.LogoutFail);
+    }
+
+    await this.tokenRepository.removeByUserId(tokenPayload.userId);
   }
 
-  private async generateAndSaveTokens(user: User): Promise<ILoginData> {
+  private mapLoginUser(user: User): IUserData {
+    return {
+      name: user.name,
+      roles: user.roles,
+      email: user.email
+    }
+  }
+
+  private async generateAndSaveTokens(user: User): Promise<ITokenData> {
     const accessToken: string = this.tokenService.generateAccessToken({
-      id: user._id,
+      userId: user._id,
       email: user.email,
-      roles: user.roles
+      roles: user.roles,
+      name: user.name
     });
 
     const refreshToken: string = this.tokenService.generateRefreshToken({
-      id: user._id
+      userId: user._id
     })
 
     await this.saveRefreshToken(user._id, refreshToken);

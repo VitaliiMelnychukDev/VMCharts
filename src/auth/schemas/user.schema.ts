@@ -21,6 +21,7 @@ export class User {
 
   @Prop()
   roles: Role[];
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ChartService } from '../services/chart.service';
 import { CreateChartDto, UpdateChartDto } from '../dtos/create-update-chart.dto';
 import { ValidationPipe } from '../../shared/pipe/validation.pipe';
@@ -6,18 +6,19 @@ import { Roles } from '../../shared/decorators/roles.decorator';
 import { Role } from '../../shared/types/role';
 import { AuthNeeded } from '../../shared/decorators/auth.decorator';
 import { ChartPath } from '../types/paths/chart';
-import { IChartResponse, IGetAllChartsResponse } from '../types/chart';
+import { IChartResponse, IChartsSearchResults, ISearchChartsResponse } from '../types/chart';
 import { Chart } from '../schemas/chart.schema';
 import { IResponse } from '../../shared/types/response';
 import { ChartMessage } from '../types/message';
+import { SearchChartsDto } from '../dtos/search-charts.dto';
 
 @Controller(ChartPath.Base)
 export class ChartController {
   constructor(private chartService: ChartService) {}
 
-  @Get(ChartPath.GetAll)
-  async getAll(): Promise<IGetAllChartsResponse> {
-    const charts: Chart[] = await this.chartService.getAll();
+  @Get(ChartPath.Search)
+  async search(@Query(new ValidationPipe()) searchDto: SearchChartsDto): Promise<ISearchChartsResponse> {
+    const charts: IChartsSearchResults = await this.chartService.search(searchDto);
 
     return {
       data: charts
@@ -38,6 +39,15 @@ export class ChartController {
   @Get(':id')
   async get(@Param('id') id: string): Promise<IChartResponse> {
     const chart: Chart = await this.chartService.get(id);
+
+    return {
+      data: chart
+    };
+  }
+
+  @Get('get-by-slug/:slug')
+  async getBySlug(@Param('slug') slug: string): Promise<IChartResponse> {
+    const chart: Chart = await this.chartService.getBySlug(slug);
 
     return {
       data: chart

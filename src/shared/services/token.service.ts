@@ -2,21 +2,33 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import * as jwt  from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { TokenError } from '../types/error';
+import { IAccessTokenBody, IAccessTokenPayload, IRefreshTokenPayload } from '../types/token';
 
 @Injectable()
 export class TokenService {
   constructor(private configService: ConfigService) {
   }
 
-  public generateAccessToken(data: any): string {
+  public generateAccessToken(data: IAccessTokenPayload): string {
     return this.generateToken(data, this.getAccessTokenExpiration());
   }
 
-  public generateRefreshToken(data: any): string {
+  public generateRefreshToken(data: IRefreshTokenPayload): string {
     return this.generateToken(data, this.getRefreshTokenExpiration());
   }
 
-  public verify(token: string): any {
+  public getAccessTokenPayload(token: string): IAccessTokenPayload {
+    const accessTokenBody: IAccessTokenBody = this.verifyAndGeTokenData(token);
+
+    return {
+      userId: accessTokenBody.userId,
+      name: accessTokenBody.name,
+      roles: accessTokenBody.roles,
+      email: accessTokenBody.email
+    }
+  }
+
+  public verifyAndGeTokenData(token: string): any {
     try {
       return  jwt.verify(token, this.getSecret());
     } catch(e) {

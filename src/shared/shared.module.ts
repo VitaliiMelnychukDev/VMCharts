@@ -3,6 +3,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
 import { TokenService } from './services/token.service';
 import { AuthGuard } from './guards/auth.guard';
+import { PaginationService } from './services/pagination.service';
+import { BaseRepository } from './repository/base.repository';
 
 
 
@@ -16,8 +18,9 @@ import { AuthGuard } from './guards/auth.guard';
       provide: APP_GUARD,
       useClass: RolesGuard
     },
-    TokenService
+    TokenService,
+    PaginationService
   ],
-  exports: [TokenService]
+  exports: [TokenService, PaginationService]
 })
 export class SharedModule {}

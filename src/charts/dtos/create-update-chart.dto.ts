@@ -7,14 +7,18 @@ class BaseChartDto {
   @IsEnum(RockGenre)
   genre?: RockGenre
 
+  @IsString()
+  @IsOptional()
+  description?: string;
+
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
-  @Type(() => Song)
-  songs?: Song[]
+  @Type(() => ChartSong)
+  songs?: ChartSong[]
 }
 
-class Song {
+export class ChartSong {
   @IsNumber()
   position: number;
 
@@ -24,10 +28,17 @@ class Song {
 
 export class CreateChartDto extends BaseChartDto {
   @IsString()
+  slug: string;
+
+  @IsString()
   name: string;
 }
 
 export class UpdateChartDto extends BaseChartDto {
+  @IsString()
+  @IsOptional()
+  slug?: string;
+
   @IsString()
   @IsOptional()
   name?: string;

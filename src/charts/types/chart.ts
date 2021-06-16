@@ -6,13 +6,18 @@ export enum RockGenre {
   Punk = 'punk',
   Grunge = 'grunge',
   Alternative = 'alternative',
-  Pop = 'pop'
+  General = 'general'
 }
 
 export interface IChartResponse extends IResponse {
   data: Chart;
 }
 
-export interface IGetAllChartsResponse extends IResponse {
-  data: Chart[];
+export interface ISearchChartsResponse extends IResponse {
+  data: IChartsSearchResults;
+}
+
+export interface IChartsSearchResults {
+  charts: Chart[],
+  totalCount: number
 }

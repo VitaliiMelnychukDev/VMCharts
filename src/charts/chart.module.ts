@@ -8,19 +8,24 @@ import { SongSchema } from './schemas/song.schema';
 import { SongSchemaName } from './types/schema/song';
 import { ChartSchemaName } from './types/schema/chart';
 import { ChartSchema } from './schemas/chart.schema';
+import { ChartRepository } from './repositories/chart.repository';
+import { SharedModule } from '../shared/shared.module';
+import { SongRepository } from './repositories/song.repository';
 
 @Module({
   imports: [MongooseModule.forFeature([
-    {
-      name: SongSchemaName,
-      schema: SongSchema
-    },
-    {
-      name: ChartSchemaName,
-      schema: ChartSchema
-    }
-  ])],
-  providers: [ChartService, SongService],
+      {
+        name: SongSchemaName,
+        schema: SongSchema
+      },
+      {
+        name: ChartSchemaName,
+        schema: ChartSchema
+      }
+    ]),
+    SharedModule
+  ],
+  providers: [ChartService, SongService, ChartRepository, SongRepository],
   controllers: [ChartController, SongController]
 })
 export class ChartModule {}

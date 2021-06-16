@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsNumberString, IsString } from 'class-validator';
 
 export class CreateSongDto {
   @IsString()
@@ -7,6 +7,6 @@ export class CreateSongDto {
   @IsString()
   author: string;
 
-  @IsNumber()
+  @IsNumberString()
   year: number;
 }

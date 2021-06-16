@@ -1,4 +1,4 @@
 import { SetMetadata } from '@nestjs/common';
-import { authDecoratorKay } from '../types/auth';
+import { authDecoratorKey } from '../types/auth';
 
-export const AuthNeeded = () => SetMetadata(authDecoratorKay, true);
+export const AuthNeeded = () => SetMetadata(authDecoratorKey, true);
