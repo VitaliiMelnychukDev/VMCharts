@@ -1,38 +1,38 @@
 
-## Installation
+
+## Commands
 
 ```bash
-$ npm install
-```
+# make start
+$ start application in development mode
 
-## Running the app
+# make build-prod
+$ build application for production
 
-```bash
-# development
-$ npm run start
+# make start-prod
+$ start application in production mode
 
-# watch mode
-$ npm run start:dev
+# make stop
+$ stop application
 
-# production mode
-$ npm run start:prod
-```
+# make logs
+$ open application logs
 
-## Test
+# make ssh
+$ go inside application container
 
-```bash
-# unit tests
-$ npm run test
+# make info
+$ get container info
 
-# e2e tests
-$ npm run test:e2e
+# make info
+$ get container ip
 
-# test coverage
-$ npm run test:cov
+# make list
+$ get containers list
 ```
 
 ###Creating Admin User
 ```
-# exmaple of command
+# exmaple of command. It has to be launch inside of vm-charts-api container
 npx nestjs-command create:admin --username Admin --email admin@gmail.com --password test1234
 ```
