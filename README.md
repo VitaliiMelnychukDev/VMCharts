@@ -34,5 +34,6 @@ $ get containers list
 ###Creating Admin User
 ```
 # exmaple of command. It has to be launch inside of vm-charts-api container
-npx nestjs-command create:admin --username Admin --email admin@gmail.com --password test1234
+1. cd /app
+2. npx nestjs-command create:admin --username Admin --email admin@gmail.com --password test1234
 ```

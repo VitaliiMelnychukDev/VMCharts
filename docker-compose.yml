@@ -1,4 +1,4 @@
-version: "3"
+version: "3.5"
 
 services:
   vm-charts-api-local:
@@ -9,18 +9,21 @@ services:
     ports:
       - 3001:3001
     volumes:
-      - .:/app
+      - ./:/app
       - /app/node_modules
     environment:
       - REDIS_PORT=6379
       - REDIS_HOST=redis
       - MONGO_HOST=db
       - JWT_SECRET='csdfsdfsflsknfskdf464_335hnsjdhfsjf'
+      - VIRTUAL_HOST=api.vm-charts.local.com
     networks:
-      - vm-charts-api-network
+      - vm-charts-network
     depends_on:
       - redis
       - db
+      - nginx-proxy-api
+
   vm-charts-api-prod:
     build: .
     container_name: vm-charts-api
@@ -32,7 +35,7 @@ services:
       - MONGO_HOST=db
       - JWT_SECRET='csdfsdfsflsknfskdf464_335hnsjdhfsjf'
     networks:
-      - vm-charts-api-network
+      - vm-charts-network
     depends_on:
       - redis
       - db
@@ -43,7 +46,16 @@ services:
     volumes:
       - redis-data:/data/
     networks:
-      - vm-charts-api-network
+      - vm-charts-network
+
+  nginx-proxy-api:
+    image: jwilder/nginx-proxy
+    ports:
+      - 81:80
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - vm-charts-network
 
   db:
     image: mongo
@@ -51,11 +63,12 @@ services:
     volumes:
       - mongo-data:/data/db
     networks:
-      - vm-charts-api-network
+      - vm-charts-network
 
 
 networks:
-  vm-charts-api-network:
+  vm-charts-network:
+    name: vm-charts-network
 
 volumes:
   redis-data:
