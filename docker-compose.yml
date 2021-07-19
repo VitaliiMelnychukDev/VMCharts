@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  vm-charts-api-local:
+    image: node:latest
+    working_dir: /app
+    command: npm run docker
+    container_name: vm-charts-api
+    ports:
+      - 3001:3001
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+      - MONGO_HOST=db
+      - JWT_SECRET='csdfsdfsflsknfskdf464_335hnsjdhfsjf'
+    networks:
+      - vm-charts-api-network
+    depends_on:
+      - redis
+      - db
+  vm-charts-api-prod:
+    build: .
+    container_name: vm-charts-api
+    ports:
+      - 3001:3001
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+      - MONGO_HOST=db
+      - JWT_SECRET='csdfsdfsflsknfskdf464_335hnsjdhfsjf'
+    networks:
+      - vm-charts-api-network
+    depends_on:
+      - redis
+      - db
+
+  redis:
+    image: redis:6.2.4
+    container_name: vm-charts-redis
+    volumes:
+      - redis-data:/data/
+    networks:
+      - vm-charts-api-network
+
+  db:
+    image: mongo
+    container_name: vm-charts-db
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - vm-charts-api-network
+
+
+networks:
+  vm-charts-api-network:
+
+volumes:
+  redis-data:
+  mongo-data:

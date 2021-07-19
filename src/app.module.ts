@@ -12,7 +12,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     AuthModule,
     ChartModule,
-    MongooseModule.forRoot(process.env.DB_URI)
+    MongooseModule.forRoot(`mongodb://${process.env.MONGO_HOST}:27017/vm_charts`)
   ],
   controllers: [],
   providers: []

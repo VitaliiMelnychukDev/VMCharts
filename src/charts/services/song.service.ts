@@ -9,10 +9,15 @@ import { SongSchemaName } from '../types/schema/song';
 import { ISongsSearchResults } from '../types/song';
 import { SongRepository } from '../repositories/song.repository';
 import { BaseSearchDto } from '../../shared/dtos/base-search.dto';
+import { CacheClient } from '../../shared/clients/cache.client';
 
 @Injectable()
 export class SongService {
-  constructor(@InjectModel(SongSchemaName) private songModel: Model<SongDocument>, private songRepository: SongRepository) {}
+  constructor(
+    @InjectModel(SongSchemaName) private songModel: Model<SongDocument>,
+    private songRepository: SongRepository,
+    private readonly cacheClient: CacheClient
+  ) {}
 
 
   public async search(searchDto: BaseSearchDto): Promise<ISongsSearchResults> {
@@ -36,6 +41,7 @@ export class SongService {
   async update(song: UpdateSongDto, songId: string): Promise<Song> {
     try {
       await this.songModel.updateOne({ _id: songId }, song);
+      await this.cacheClient.delete(songId);
     } catch(e) {
       throw new BadRequestException(SongError.UpdateSongError);
     }
@@ -47,7 +53,16 @@ export class SongService {
     let song: Song | null = null;
 
     try {
+      const cachedSong: Song = await this.cacheClient.get<Song>(songId);
+      if (cachedSong) {
+        return cachedSong;
+      }
+
       song = await this.songModel.findOne({ _id: songId });
+
+      if (song) {
+        await this.cacheClient.set<Song>(song._id, song);
+      }
     } catch(e) {
       throw new BadRequestException(SongError.GetSongError);
     }
@@ -64,6 +79,10 @@ export class SongService {
 
     try {
       song = await this.songModel.findOneAndDelete({ _id: songId });
+
+      if (song) {
+        await this.cacheClient.delete(songId);
+      }
     } catch(e) {
       throw new BadRequestException(SongError.DeleteSongError);
     }

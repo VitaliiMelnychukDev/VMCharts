@@ -4,11 +4,14 @@ import { RolesGuard } from './guards/roles.guard';
 import { TokenService } from './services/token.service';
 import { AuthGuard } from './guards/auth.guard';
 import { PaginationService } from './services/pagination.service';
-import { BaseRepository } from './repository/base.repository';
-
-
+import { RedisModule } from 'nestjs-redis';
+import { configs } from './types/redis';
+import { CacheClient } from './clients/cache.client';
 
 @Module({
+  imports: [
+    RedisModule.register(configs),
+  ],
   providers: [
     {
       provide: APP_GUARD,
@@ -19,8 +22,9 @@ import { BaseRepository } from './repository/base.repository';
       useClass: RolesGuard
     },
     TokenService,
-    PaginationService
+    PaginationService,
+    CacheClient
   ],
-  exports: [TokenService, PaginationService]
+  exports: [TokenService, PaginationService, CacheClient]
 })
 export class SharedModule {}
