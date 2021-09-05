@@ -14,17 +14,19 @@ import { StatusCodes } from 'http-status-codes';
 import { AuthNeeded } from '../../shared/decorators/auth.decorator';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { Role } from '../../shared/types/role';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller(AuthPath.Base)
 export class AuthController {
   constructor(private userService: UserService, private authService: AuthService) {
   }
 
+  @ApiBearerAuth()
   @AuthNeeded()
   @Roles(Role.Admin)
   @Post(AuthPath.Register)
-  public async register(@Body(new ValidationPipe()) user: CreateUserDto): Promise<IResponse> {
-    await this.userService.create(user);
+  public async register(@Body(new ValidationPipe()) body: CreateUserDto): Promise<IResponse> {
+    await this.userService.create(body);
 
     return {
       message: AuthMessage.UserCreationSuccess
@@ -33,8 +35,8 @@ export class AuthController {
 
   @HttpCode(StatusCodes.OK)
   @Post(AuthPath.Login)
-  public async login(@Body(new ValidationPipe()) payload: LoginUserDto): Promise<ILoginResponse> {
-    const loginData: ILoginData = await this.authService.login(payload);
+  public async login(@Body(new ValidationPipe()) body: LoginUserDto): Promise<ILoginResponse> {
+    const loginData: ILoginData = await this.authService.login(body);
 
     return {
       data: loginData
@@ -43,8 +45,8 @@ export class AuthController {
 
   @HttpCode(StatusCodes.OK)
   @Post(AuthPath.Refresh)
-  public async refresh(@Body(new ValidationPipe()) payload: RefreshTokenDto): Promise<IRefreshTokenResponse> {
-    const refreshTokenData: ITokenData = await this.authService.refreshToken(payload.refreshToken);
+  public async refresh(@Body(new ValidationPipe()) body: RefreshTokenDto): Promise<IRefreshTokenResponse> {
+    const refreshTokenData: ITokenData = await this.authService.refreshToken(body.refreshToken);
 
     return {
       data: refreshTokenData
@@ -53,8 +55,8 @@ export class AuthController {
 
   @HttpCode(StatusCodes.OK)
   @Post(AuthPath.Validate)
-  public validate(@Body(new ValidationPipe()) payload: ValidateTokenDto): IResponse {
-     this.authService.validateToken(payload.accessToken);
+  public validate(@Body(new ValidationPipe()) body: ValidateTokenDto): IResponse {
+     this.authService.validateToken(body.accessToken);
 
     return {
       message: AuthMessage.TokenValidationSuccess
@@ -63,8 +65,8 @@ export class AuthController {
 
   @HttpCode(StatusCodes.OK)
   @Post(AuthPath.Logout)
-  public async logout(@Body(new ValidationPipe()) payload: RefreshTokenDto): Promise<IResponse> {
-    await this.authService.logout(payload.refreshToken);
+  public async logout(@Body(new ValidationPipe()) body: RefreshTokenDto): Promise<IResponse> {
+    await this.authService.logout(body.refreshToken);
 
     return {
       message: AuthMessage.LogoutSuccess

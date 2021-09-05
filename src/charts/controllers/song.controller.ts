@@ -12,14 +12,15 @@ import { ISearchSongsResponse, ISongResponse, ISongsSearchResults } from '../typ
 import { SongMessage } from '../types/message';
 import { UpdateSongDto } from '../dtos/update-song.dto';
 import { BaseSearchDto } from '../../shared/dtos/base-search.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller(SongPath.Base)
 export class SongController {
   constructor(private songService: SongService) {}
 
   @Get(SongPath.Search)
-  async search(@Query(new ValidationPipe()) searchDto: BaseSearchDto): Promise<ISearchSongsResponse> {
-    const songs: ISongsSearchResults = await this.songService.search(searchDto);
+  async search(@Query(new ValidationPipe()) body: BaseSearchDto): Promise<ISearchSongsResponse> {
+    const songs: ISongsSearchResults = await this.songService.search(body);
 
     return {
       data: songs
@@ -35,31 +36,34 @@ export class SongController {
     };
   }
 
+  @ApiBearerAuth()
   @AuthNeeded()
   @Roles(Role.Admin, Role.ChartEditor, Role.SongEditor)
   @Post()
-  async create(@Body(new ValidationPipe()) song: CreateSongDto): Promise<ISongResponse> {
-    const createdSong: Song = await this.songService.create(song);
+  async create(@Body(new ValidationPipe()) body: CreateSongDto): Promise<ISongResponse> {
+    const createdSong: Song = await this.songService.create(body);
 
     return {
       data: createdSong
     };
   }
 
+  @ApiBearerAuth()
   @AuthNeeded()
   @Roles(Role.Admin, Role.ChartEditor, Role.SongEditor)
   @Patch(':id')
   async update(
-    @Body(new ValidationPipe()) song: UpdateSongDto,
+    @Body(new ValidationPipe()) body: UpdateSongDto,
     @Param('id') id: string
   ): Promise<ISongResponse> {
-    const updatedSong: Song = await this.songService.update(song, id);
+    const updatedSong: Song = await this.songService.update(body, id);
 
     return {
       data: updatedSong
     };
   }
 
+  @ApiBearerAuth()
   @AuthNeeded()
   @Roles(Role.Admin, Role.ChartEditor, Role.SongEditor)
   @Delete(':id')

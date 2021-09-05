@@ -11,25 +11,27 @@ import { Chart } from '../schemas/chart.schema';
 import { IResponse } from '../../shared/types/response';
 import { ChartMessage } from '../types/message';
 import { SearchChartsDto } from '../dtos/search-charts.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller(ChartPath.Base)
 export class ChartController {
   constructor(private chartService: ChartService) {}
 
   @Get(ChartPath.Search)
-  async search(@Query(new ValidationPipe()) searchDto: SearchChartsDto): Promise<ISearchChartsResponse> {
-    const charts: IChartsSearchResults = await this.chartService.search(searchDto);
+  async search(@Query(new ValidationPipe()) body: SearchChartsDto): Promise<ISearchChartsResponse> {
+    const charts: IChartsSearchResults = await this.chartService.search(body);
 
     return {
       data: charts
     };
   }
 
+  @ApiBearerAuth()
   @AuthNeeded()
   @Roles(Role.Admin, Role.ChartEditor)
   @Post()
-  async create(@Body(new ValidationPipe()) createChartDTO: CreateChartDto): Promise<IChartResponse> {
-    const chart: Chart =  await this.chartService.create(createChartDTO);
+  async create(@Body(new ValidationPipe()) body: CreateChartDto): Promise<IChartResponse> {
+    const chart: Chart =  await this.chartService.create(body);
 
     return {
       data: chart
@@ -54,20 +56,22 @@ export class ChartController {
     };
   }
 
+  @ApiBearerAuth()
   @AuthNeeded()
   @Roles(Role.Admin, Role.ChartEditor)
   @Patch(':id')
   async update(
-    @Body(new ValidationPipe()) chart: UpdateChartDto,
+    @Body(new ValidationPipe()) body: UpdateChartDto,
     @Param('id') id: string
   ): Promise<IChartResponse> {
-    const updatedChart: Chart = await this.chartService.update(chart, id);
+    const updatedChart: Chart = await this.chartService.update(body, id);
 
     return {
       data: updatedChart
     };
   }
 
+  @ApiBearerAuth()
   @AuthNeeded()
   @Roles(Role.Admin, Role.ChartEditor)
   @Delete(':id')
